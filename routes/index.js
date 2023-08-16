@@ -5,9 +5,9 @@ const subitemsRouter = require('./subitems.router');
 
 function routerApi(app) {
   const router = express.Router();
-  app.use('/api', router); 
+  app.use('/api/v1', router); 
   router.use('/items', itemsRouter);
-  router.use('/sub', subitemsRouter);
+  router.use('/subitems', subitemsRouter);
 }
 
 module.exports = routerApi;

@@ -5,7 +5,7 @@ class SubItemsService {
     constructor() {}
 
     async find() {
-      const res = await models.Item.findAll();
+      const res = await models.SubItem.findAll();
       return res;
     }
   
