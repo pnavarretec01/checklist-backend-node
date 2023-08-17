@@ -1,16 +1,18 @@
 const { Sequelize } = require('sequelize');
 
 const  { config } = require('../config/config');
-const setupModels = require('../db/models');
+const setupModels = require('../models');
   
 const sequelize = new Sequelize(
-    config.dbName, // name database
-    config.dbUser, // user database
-    config.dbPassword, // password database
+    config.dbName,
+    config.dbUser,
+    config.dbPassword,
     {
       host: config.dbHost,
-      dialect: 'postgresql' 
-    }
+      dialect: 'postgresql' ,
+      logging: false 
+    },
+    
   );
 
 sequelize.sync();

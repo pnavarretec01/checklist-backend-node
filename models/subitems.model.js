@@ -32,9 +32,11 @@ const SubItemSchema = {
     },
     fk_item_id: {
         allowNull: false,
-        foreignKey: true,
         type: DataTypes.INTEGER,
-        field: 'fk_item_id'
+        references: {
+            model: 'item',
+            key: 'pk_item_id'
+        }
     }
 }
   

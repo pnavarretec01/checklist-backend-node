@@ -1,12 +1,12 @@
-const { Model, DataTypes, Sequelize } = require('sequelize');
+const { Model, DataTypes } = require('sequelize');
 
-const ITEM_TABLE = 'formulario';
+const FORMULARIO_TABLE = 'formulario';
 
 class Formulario extends Model {
     static config(sequelize) {
         return {
             sequelize,
-            tableName: ITEM_TABLE,
+            tableName: FORMULARIO_TABLE,
             modelName: 'Formulario',
             timestamps: false
         }
@@ -30,7 +30,7 @@ const FormularioSchema = {
         type: DataTypes.DATE,
         field: 'fecha'
     },
-    subdivisions: {
+    subdivision: {
         allowNull: false,
         type: DataTypes.STRING,
         field: 'subdivision'
