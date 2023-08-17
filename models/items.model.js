@@ -28,6 +28,7 @@ const ItemSchema = {
     orden: {
         allowNull: false,
         type: DataTypes.INTEGER,
+        unique: true,
         field: 'orden'
     }
 }

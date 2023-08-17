@@ -28,6 +28,7 @@ const SubItemSchema = {
     orden:{
         allowNull: false,
         type: DataTypes.INTEGER,
+        unique: true,
         field:'orden'
     },
     fk_item_id: {

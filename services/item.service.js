@@ -15,7 +15,12 @@ class ItemsService {
     }
 
     async create(data) {
-      const res = await models.Item.create(data);
+      const existeOrden = await models.Item.findOne({ orden: data.orden })
+      if (existeOrden) {
+        const res = await models.Item.create(data);
+      }else{
+        throw new Error('Ya existe un orden')
+      }
       return res;
     }
 
