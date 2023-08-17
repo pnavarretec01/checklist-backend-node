@@ -1,42 +1,69 @@
-const { models } = require('../libs/sequelize');
+const sequelize = require('../libs/sequelize');
+const { Op } = require('sequelize');
+const { models } = sequelize;
 
-class SubItemsService { 
-  
-    constructor() {}
+class SubItemsService {
+  async find() {
+    return await models.SubItem.findAll();
+  }
 
-    async find() {
-        return await models.SubItem.findAll();
+  async findOne(id) {
+    return await models.SubItem.findByPk(id);
+  }
+
+  async findOneByFk(id) {
+    return await models.SubItem.findOne({ where: { fk_item_id: id } });
+  }
+
+  async create(data) {
+    const existeSubItem = await models.SubItem.findOne({
+      where: {
+        [Op.or]: [
+          { orden: data.orden },
+          { nombre: data.nombre }
+        ]
+      }
+    });
+
+    if (existeSubItem) {
+      throw new Error("Ya existe un registro con estas características");
     }
 
-    async findOne(id) {
-        return await models.SubItem.findByPk(id);
+    const res = await models.SubItem.create(data);
+    return res;
+  }
+
+  async update(id, data) {
+    const model = await this.findOne(id);
+
+    if (
+      (data.orden !== undefined && data.orden !== model.orden) ||
+      (data.nombre !== undefined && data.nombre !== model.nombre)
+    ) {
+      const existingItem = await models.SubItem.findOne({
+        where: {
+          [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
+          [Op.not]: { pk_subitem_id: id }, // Cambia pk_item_id a pk_subitem_id
+        },
+      });
+
+      if (existingItem) {
+        throw new Error("Ya existe un Subitem con el mismo orden o nombre");
+      }
     }
 
-    async findOneByFk(id) {
-        return await models.SubItem.findOne({ where: { fk_item_id: id } });
-    }
+    const res = await model.update(data);
+    return res;
+  }
 
-    async create(data) {
-        return await models.SubItem.create(data);
+  async delete(id) {
+    const model = await this.findOne(id);
+    if (!model) {
+      throw new Error('SubItem no encontrado');
     }
-
-    async update(id, data) {
-        const model = await this.findOne(id);
-        if (!model) {
-            throw new Error('SubItem not found');
-        }
-        return await model.update(data);
-    }
-
-    async delete(id) {
-        const model = await this.findOne(id);
-        if (!model) {
-            throw new Error('SubItem not found');
-        }
-        await model.destroy();
-        return { deleted: true };
-    }
-  
+    await model.destroy();
+    return { deleted: true };
+  }
 }
 
 module.exports = SubItemsService;
