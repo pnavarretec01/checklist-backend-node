@@ -43,7 +43,7 @@ class SubItemsService {
       const existingItem = await models.SubItem.findOne({
         where: {
           [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
-          [Op.not]: { pk_subitem_id: id }, // Cambia pk_item_id a pk_subitem_id
+          [Op.not]: { pk_subitem_id: id },
         },
       });
 
