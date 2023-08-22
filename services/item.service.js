@@ -6,11 +6,33 @@ class ItemsService {
   constructor() {}
 
   async find() {
-    const res = await models.Item.findAll();
+    const res = await models.Item.findAll({
+      include: [
+        {
+          model: models.SubItem,
+          as: "subitems",
+        },
+      ],
+    });
     return res;
   }
 
   async findOne(id) {
+    const res = await models.Item.findByPk(id, {
+        include: [{
+            model: models.SubItem,
+            as: 'subitems'
+        }]
+    });
+    return res;
+}
+
+  async findItems() {
+    const res = await models.Item.findAll();
+    return res;
+  }
+
+  async findOneItem(id) {
     const res = await models.Item.findByPk(id);
     return res;
   }

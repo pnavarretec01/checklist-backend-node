@@ -29,7 +29,12 @@ const getByItemItemId = async (req, res, next) => {
 
 const create = async (req, res, next) => {
   try {
-    const response = await service.create(req.body);
+    const { itemId } = req.params;
+    const { nombre, orden } = req.body;
+
+    const dataSubItem = { nombre, orden, fk_item_id: itemId };
+    const response = await service.create(dataSubItem);
+
     res.status(201).json({ success: true, code: 201, data: response });
   } catch (error) {
     if (error.message === "Ya existe un item con el mismo orden") {
@@ -42,10 +47,14 @@ const create = async (req, res, next) => {
   }
 };
 
-const getById = async (req, res, next) => {
+const update = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const response = await service.findOne(id);
+    const { itemId, id } = req.params;
+
+    const { nombre, orden } = req.body;
+    const dataSubItem = { nombre, orden, fk_item_id: itemId };
+
+    const response = await service.update(id, dataSubItem);
 
     if (!response) {
       const error = new Error("SubItem no encontrado");
@@ -59,11 +68,10 @@ const getById = async (req, res, next) => {
   }
 };
 
-const update = async (req, res, next) => {
+const getById = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const body = req.body;
-    const response = await service.update(id, body);
+    const response = await service.findOne(id);
 
     if (!response) {
       const error = new Error("SubItem no encontrado");

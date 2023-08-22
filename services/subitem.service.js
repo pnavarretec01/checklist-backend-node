@@ -21,21 +21,22 @@ class SubItemsService {
         [Op.or]: [
           { orden: data.orden },
           { nombre: data.nombre }
-        ]
+        ],
+        fk_item_id: data.fk_item_id
       }
     });
-
+  
     if (existeSubItem) {
       throw new Error("Ya existe un registro con estas características");
     }
-
+  
     const res = await models.SubItem.create(data);
     return res;
   }
 
   async update(id, data) {
     const model = await this.findOne(id);
-
+  
     if (
       (data.orden !== undefined && data.orden !== model.orden) ||
       (data.nombre !== undefined && data.nombre !== model.nombre)
@@ -44,17 +45,19 @@ class SubItemsService {
         where: {
           [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
           [Op.not]: { pk_subitem_id: id },
+          fk_item_id: model.fk_item_id  // Asegúrate de que estás buscando solo dentro del mismo item
         },
       });
-
+  
       if (existingItem) {
         throw new Error("Ya existe un Subitem con el mismo orden o nombre");
       }
     }
-
+  
     const res = await model.update(data);
     return res;
   }
+  
 
   async delete(id) {
     const model = await this.findOne(id);
