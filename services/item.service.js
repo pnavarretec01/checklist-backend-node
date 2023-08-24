@@ -1,5 +1,5 @@
-const sequelize = require('../libs/sequelize');
-const { Op } = require('sequelize');
+const sequelize = require("../libs/sequelize");
+const { Op } = require("sequelize");
 const { models } = sequelize;
 
 class ItemsService {
@@ -13,19 +13,25 @@ class ItemsService {
           as: "subitems",
         },
       ],
+      order: [
+        ["orden", "ASC"],
+        ["subitems", "orden", "ASC"],
+      ],
     });
     return res;
   }
 
   async findOne(id) {
     const res = await models.Item.findByPk(id, {
-        include: [{
-            model: models.SubItem,
-            as: 'subitems'
-        }]
+      include: [
+        {
+          model: models.SubItem,
+          as: "subitems",
+        },
+      ],
     });
     return res;
-}
+  }
 
   async findItems() {
     const res = await models.Item.findAll();
@@ -42,12 +48,9 @@ class ItemsService {
     try {
       const existeItem = await models.Item.findOne({
         where: {
-          [Op.or]: [
-            { orden: data.orden },
-            { nombre: data.nombre }
-          ]
+          [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
         },
-        transaction
+        transaction,
       });
 
       if (existeItem) {
@@ -77,7 +80,7 @@ class ItemsService {
             [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
             [Op.not]: { pk_item_id: id },
           },
-          transaction
+          transaction,
         });
 
         if (existingItem) {
@@ -95,14 +98,23 @@ class ItemsService {
   }
 
   async delete(id) {
-    const transaction = await sequelize.transaction();
     try {
       const model = await this.findOne(id);
-      await model.destroy({ transaction });
-      await transaction.commit();
+      if (!model) {
+        throw new Error("Elemento no encontrado");
+      }
+
+      // Eliminar subitems primero
+      await models.SubItem.destroy({
+        where: {
+          fk_item_id: id,
+        },
+      });
+
+      // Ahora, eliminar el item principal
+      await model.destroy();
       return { deleted: true };
     } catch (error) {
-      await transaction.rollback();
       throw error;
     }
   }
