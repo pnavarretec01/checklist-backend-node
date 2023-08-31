@@ -1,57 +1,28 @@
-const FormulariosService = require("../services/formulario.service");
-const service = new FormulariosService();
+const FormularioService = require("../services/formulario.service");
+const service = new FormularioService();
 
 const get = async (req, res) => {
   try {
-    const formularios = await service.find();
-    const response = formularios.map((formulario) => {
-      return {
-        pk_formulario_id: formulario.pk_formulario_id,
-        nombre_supervisor: formulario.nombre_supervisor,
-        fecha: formulario.fecha,
-        subdivision: formulario.subdivision,
-        observacion_general: formulario.observacion_general,
-        pk_inicio: formulario.pk_inicio,
-        pk_termino: formulario.pk_termino,
-        items: formulario.CaracteristicaFormularios.map((caracteristica) => {
-          return {
-            id: caracteristica.item_id,
-            title: caracteristica.Item.title, // Asegúrate de que 'Item' tiene una propiedad 'title'
-            items: [
-              {
-                id: caracteristica.subitem_id,
-                title: caracteristica.SubItem.title, // Asegúrate de que 'SubItem' tiene una propiedad 'title'
-                data: [
-                  {
-                    caracteristica_formulario_id:
-                      caracteristica.caracteristica_formulario_id,
-                    item_id: caracteristica.item_id,
-                    subitem_id: caracteristica.subitem_id,
-                    pk: caracteristica.pk,
-                    collera: caracteristica.collera,
-                    observacion: caracteristica.observacion,
-                    formulario_id: caracteristica.formulario_id,
-                  },
-                ],
-              },
-            ],
-          };
-        }),
-      };
-    });
+    const response = await service.getAllFormularios();
     res.json(response);
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
 };
 
-const addMultipleFeatures = async (req, res) => {
+const addForms = async (req, res) => {
   try {
-    const featuresData = req.body.features; // Suponiendo que las características se envían con la clave 'features'
-    const newFeatures = await caracteristicaService.addMultipleFeatures(
-      featuresData
-    );
-    res.json(newFeatures);
+    const result = await service.addFormsAndFeatures(req.body);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).send({ success: false, message: error.message });
+  }
+};
+
+const getById = async (req, res) => {
+  try {
+    const response = await service.getFormularioById(req.params.id);
+    res.json(response);
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
@@ -59,16 +30,50 @@ const addMultipleFeatures = async (req, res) => {
 
 const addFeature = async (req, res) => {
   try {
-    const featureData = req.body;
-    const newFeature = await service.addFeature(featureData);
+    const newFeature = await service.addFeature(req.body);
     res.json(newFeature);
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
   }
 };
 
+const editFormulario = async (req, res) => {
+  try {
+    await service.handleEditFormulario(req.body);
+    res.status(200).json({
+      success: true,
+      message: "Formulario editado exitosamente!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Fallo al editar el Formulario",
+      error: error.message,
+    });
+  }
+};
+
+const deleteFormulario = async (req, res) => {
+  try {
+    await service.deleteFormularioById(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: "Formulario eliminado exitosamente!",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Fallo al eliminar el Formulario",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   get,
+  getById,
   addFeature,
-  addMultipleFeatures
+  addForms,
+  editFormulario,
+  deleteFormulario
 };

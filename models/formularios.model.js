@@ -55,6 +55,11 @@ const FormularioSchema = {
     type: DataTypes.INTEGER,
     field: "pk_termino",
   },
+  cerrado: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    field: "cerrado",
+  },
 };
 
 module.exports = { Formulario, FormularioSchema };
