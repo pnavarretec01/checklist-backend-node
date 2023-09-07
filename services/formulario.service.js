@@ -8,63 +8,19 @@ class FormularioService {
   }
 
   async getAllFormularios() {
-    const formularios = await this.find();
-    return formularios.map((formulario) =>
-      this.transformFormulario(formulario)
+    const allFormularios = await this.find();
+
+    const transformedFormularios = await Promise.all(
+      allFormularios.map(async (formulario) => {
+        const result = await this.getFormularioStructure(formulario);
+        return result.data;
+      })
     );
+
+    return transformedFormularios;
   }
 
-  transformFormulario(formulario) {
-    return {
-      pk_formulario_id: formulario.pk_formulario_id,
-      nombre_supervisor: formulario.nombre_supervisor,
-      fecha: formulario.fecha,
-      subdivision: formulario.subdivision,
-      observacion_general: formulario.observacion_general,
-      pk_inicio: formulario.pk_inicio,
-      pk_termino: formulario.pk_termino,
-      cerrado: formulario.cerrado,
-      items: formulario.CaracteristicaFormularios.map((caracteristica) => ({
-        id: caracteristica.item_id,
-        title: caracteristica.Item.title,
-        items: [
-          {
-            id: caracteristica.subitem_id,
-            title: caracteristica.SubItem.title,
-            data: [
-              {
-                caracteristica_formulario_id:
-                  caracteristica.caracteristica_formulario_id,
-                item_id: caracteristica.item_id,
-                subitem_id: caracteristica.subitem_id,
-                pk: caracteristica.pk,
-                collera: caracteristica.collera,
-                observacion: caracteristica.observacion,
-                formulario_id: caracteristica.formulario_id,
-              },
-            ],
-          },
-        ],
-      })),
-    };
-  }
-
-  async addFormsAndFeatures(data) {
-    const formData = data.formulario;
-    const formulario = await this.addForm(formData);
-
-    const featuresData = data.features.map((feature) => ({
-      ...feature,
-      formulario_id: formulario.pk_formulario_id,
-    }));
-
-    const caracteristicas = await this.addMultipleFeatures(featuresData);
-    return { formulario, caracteristicas };
-  }
-
-  async getFormularioById(id) {
-    const formulario = await this.findById(id);
-
+  async getFormularioStructure(formulario) {
     let subItemMap = {};
     const itemsStructureOriginal = await this.findAllItemsWithSubItems();
     const itemsStructure = this.deepCopy(itemsStructureOriginal);
@@ -137,6 +93,59 @@ class FormularioService {
     };
   }
 
+  transformFormulario(formulario) {
+    return {
+      pk_formulario_id: formulario.pk_formulario_id,
+      nombre_supervisor: formulario.nombre_supervisor,
+      fecha: formulario.fecha,
+      subdivision: formulario.subdivision,
+      observacion_general: formulario.observacion_general,
+      pk_inicio: formulario.pk_inicio,
+      pk_termino: formulario.pk_termino,
+      cerrado: formulario.cerrado,
+      items: formulario.CaracteristicaFormularios.map((caracteristica) => ({
+        id: caracteristica.item_id,
+        title: caracteristica.Item.title,
+        items: [
+          {
+            id: caracteristica.subitem_id,
+            title: caracteristica.SubItem.title,
+            data: [
+              {
+                caracteristica_formulario_id:
+                  caracteristica.caracteristica_formulario_id,
+                item_id: caracteristica.item_id,
+                subitem_id: caracteristica.subitem_id,
+                pk: caracteristica.pk,
+                collera: caracteristica.collera,
+                observacion: caracteristica.observacion,
+                formulario_id: caracteristica.formulario_id,
+              },
+            ],
+          },
+        ],
+      })),
+    };
+  }
+
+  async addFormsAndFeatures(data) {
+    const formData = data.formulario;
+    const formulario = await this.addForm(formData);
+
+    const caracteristicasData = data.caracteristicas.map((caracteristica) => ({
+      ...caracteristica,
+      formulario_id: formulario.pk_formulario_id,
+    }));
+
+    const caracteristicas = await this.agregarMultiplesCaracteristicas(caracteristicasData);
+    return { formulario, caracteristicas };
+  }
+
+  async getFormularioById(id) {
+    const formulario = await this.findById(id);
+    return this.getFormularioStructure(formulario);
+  }
+
   async find() {
     return await models.Formulario.findAll({
       include: [
@@ -159,8 +168,8 @@ class FormularioService {
     return await models.Formulario.create(formularioData);
   }
 
-  async addMultipleFeatures(featuresData) {
-    return await models.CaracteristicaFormulario.bulkCreate(featuresData);
+  async agregarMultiplesCaracteristicas(caracteristicasData) {
+    return await models.CaracteristicaFormulario.bulkCreate(caracteristicasData);
   }
 
   async findById(id) {
@@ -267,12 +276,12 @@ class FormularioService {
     try {
       // elimina todas las CaracteristicaFormulario asociadas a ese formulario
       await models.CaracteristicaFormulario.destroy({
-        where: { formulario_id: id }
+        where: { formulario_id: id },
       });
-  
+
       // elimina el formulario
       await models.Formulario.destroy({
-        where: { pk_formulario_id: id }
+        where: { pk_formulario_id: id },
       });
     } catch (error) {
       throw new Error("Error al eliminar el Formulario y sus Características");
