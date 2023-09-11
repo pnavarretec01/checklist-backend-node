@@ -132,7 +132,7 @@ class FormularioService {
     const formData = data.formulario;
     const formulario = await this.addForm(formData);
 
-    const caracteristicasData = data.caracteristicas.map((caracteristica) => ({
+    const caracteristicasData = data.features.map((caracteristica) => ({
       ...caracteristica,
       formulario_id: formulario.pk_formulario_id,
     }));
