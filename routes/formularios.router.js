@@ -6,7 +6,7 @@ router
   .get("/", formulariosControllers.get)
   .get("/:id", formulariosControllers.getById)
   .post("/add-feature", formulariosControllers.addFeature)
-  .post("/addForm", formulariosControllers.addForms)
+  .post("/", formulariosControllers.addForms)
   .put("/:id", formulariosControllers.editFormulario)
   .delete("/:id", formulariosControllers.deleteFormulario);
 

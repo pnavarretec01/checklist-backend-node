@@ -37,7 +37,7 @@ const getById = async (req, res, next) => {
     const response = await service.findOne(id);
 
     if (!response) {
-      const error = new Error("Item not found");
+      const error = new Error("Item no encontrado");
       error.statusCode = 404;
       throw error;
     }
@@ -84,7 +84,7 @@ const _delete = async (req, res, next) => {
     const response = await service.delete(id);
 
     if (!response) {
-      const error = new Error("Item not found");
+      const error = new Error("Item no encontrado");
       error.statusCode = 404;
       throw error;
     }
