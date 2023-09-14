@@ -8,7 +8,7 @@ class SubItem extends Model {
       sequelize,
       tableName: ITEM_TABLE,
       modelName: "SubItem",
-      timestamps: false,
+      timestamps: true,
     };
   }
   static associate(models) {
@@ -46,6 +46,16 @@ const SubItemSchema = {
       model: "item",
       key: "pk_item_id",
     },
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
   },
 };
 

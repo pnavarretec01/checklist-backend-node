@@ -1,4 +1,4 @@
-const { Model, DataTypes } = require("sequelize");
+const { Model, DataTypes, Sequelize } = require("sequelize");
 
 const FORMULARIO_TABLE = "formulario";
 
@@ -8,7 +8,7 @@ class Formulario extends Model {
       sequelize,
       tableName: FORMULARIO_TABLE,
       modelName: "Formulario",
-      timestamps: false,
+      timestamps: true,
     };
   }
   static associate(models) {
@@ -59,6 +59,16 @@ const FormularioSchema = {
     allowNull: false,
     type: DataTypes.BOOLEAN,
     field: "cerrado",
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: Sequelize.NOW,
   },
 };
 

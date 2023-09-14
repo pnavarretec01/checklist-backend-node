@@ -1,28 +1,20 @@
 const { Model, DataTypes, Sequelize } = require("sequelize");
 
-const ITEM_TABLE = "item";
+const SUBDIVISION_TABLE = "subdivision";
 
-class Item extends Model {
+class Subdivision extends Model {
   static config(sequelize) {
     return {
       sequelize,
-      tableName: ITEM_TABLE,
-      modelName: "Item",
+      tableName: SUBDIVISION_TABLE,
+      modelName: "Subdivision",
       timestamps: true,
     };
   }
-  static associate(models) {
-    this.hasMany(models.SubItem, {
-      foreignKey: "fk_item_id",
-      as: "subitems",
-      onDelete: "cascade",
-      hooks: true,
-    });
-  }
 }
 
-const ItemSchema = {
-  pk_item_id: {
+const SubdivisionSchema = {
+  pk_subdivision_id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
@@ -33,11 +25,15 @@ const ItemSchema = {
     type: DataTypes.STRING,
     field: "nombre",
   },
-  orden: {
+  pk_inicio: {
     allowNull: false,
     type: DataTypes.INTEGER,
-    unique: true,
-    field: "orden",
+    field: "pk_inicio",
+  },
+  pk_termino: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    field: "pk_termino",
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -48,7 +44,7 @@ const ItemSchema = {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: Sequelize.NOW,
-  }  
+  },
 };
 
-module.exports = { Item, ItemSchema };
+module.exports = { Subdivision, SubdivisionSchema };
