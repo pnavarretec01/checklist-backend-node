@@ -17,6 +17,7 @@ function setupModels(sequelize) {
         Item,
         SubItem,
         Formulario,
+        Subdivision,
         CaracteristicaFormulario
     };
 

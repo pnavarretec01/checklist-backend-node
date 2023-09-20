@@ -129,7 +129,12 @@ class FormularioService {
   }
 
   async addFormsAndFeatures(data) {
-    const formData = data.formulario;
+
+    const formData = {
+      ...data.formulario,
+      fk_subdivision_id: data.formulario.subdivision,
+    };
+
     const formulario = await this.addForm(formData);
 
     const caracteristicasData = data.features.map((caracteristica) => ({
@@ -137,7 +142,9 @@ class FormularioService {
       formulario_id: formulario.pk_formulario_id,
     }));
 
-    const caracteristicas = await this.agregarMultiplesCaracteristicas(caracteristicasData);
+    const caracteristicas = await this.agregarMultiplesCaracteristicas(
+      caracteristicasData
+    );
     return { formulario, caracteristicas };
   }
 
@@ -160,6 +167,10 @@ class FormularioService {
             },
           ],
         },
+        {
+          model: models.Subdivision,
+          as: "Subdivision",
+        },
       ],
     });
   }
@@ -169,7 +180,9 @@ class FormularioService {
   }
 
   async agregarMultiplesCaracteristicas(caracteristicasData) {
-    return await models.CaracteristicaFormulario.bulkCreate(caracteristicasData);
+    return await models.CaracteristicaFormulario.bulkCreate(
+      caracteristicasData
+    );
   }
 
   async findById(id) {
@@ -188,6 +201,10 @@ class FormularioService {
               as: "SubItem",
             },
           ],
+        },
+        {
+          model: models.Subdivision,
+          as: "Subdivision",
         },
       ],
     });
@@ -213,6 +230,7 @@ class FormularioService {
   //edicion
   async handleEditFormulario(body) {
     const { pk_formulario_id, items, ...formData } = body;
+    formData.fk_subdivision_id = formData.subdivision;
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,

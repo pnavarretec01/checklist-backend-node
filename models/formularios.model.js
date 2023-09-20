@@ -15,6 +15,10 @@ class Formulario extends Model {
     this.hasMany(models.CaracteristicaFormulario, {
       foreignKey: "formulario_id",
     });
+    this.belongsTo(models.Subdivision, {
+      foreignKey: "fk_subdivision_id",
+      as: "Subdivision",
+    });
   }
 }
 
@@ -35,10 +39,10 @@ const FormularioSchema = {
     type: DataTypes.DATE,
     field: "fecha",
   },
-  subdivision: {
-    allowNull: false,
-    type: DataTypes.STRING,
-    field: "subdivision",
+  fk_subdivision_id: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    field: "fk_subdivision_id",
   },
   observacion_general: {
     allowNull: false,

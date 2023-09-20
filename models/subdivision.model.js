@@ -11,6 +11,13 @@ class Subdivision extends Model {
       timestamps: true,
     };
   }
+
+  static associate(models) {
+    this.hasMany(models.Formulario, {
+      foreignKey: "fk_subdivision_id",
+      as: "Formularios",
+    });
+  }
 }
 
 const SubdivisionSchema = {
