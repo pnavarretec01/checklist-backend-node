@@ -44,6 +44,11 @@ const FormularioSchema = {
     type: DataTypes.INTEGER,
     field: "fk_subdivision_id",
   },
+  subdivision: {
+    allowNull: false,
+    type: DataTypes.STRING,
+    field: "subdivision",
+  },
   observacion_general: {
     allowNull: false,
     type: DataTypes.STRING,

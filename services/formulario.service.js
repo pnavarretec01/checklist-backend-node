@@ -53,7 +53,7 @@ class FormularioService {
       pk_formulario_id: formulario.pk_formulario_id,
       nombre_supervisor: formulario.nombre_supervisor,
       fecha: formulario.fecha,
-      subdivision: formulario.subdivision,
+      subdivision: formulario.Subdivision, // Aquí es donde se hizo el cambio
       observacion_general: formulario.observacion_general,
       pk_inicio: formulario.pk_inicio,
       pk_termino: formulario.pk_termino,
@@ -91,7 +91,8 @@ class FormularioService {
       code: 200,
       data: response,
     };
-  }
+}
+
 
   transformFormulario(formulario) {
     return {
@@ -176,6 +177,7 @@ class FormularioService {
   }
 
   async addForm(formularioData) {
+    console.log(formularioData);
     return await models.Formulario.create(formularioData);
   }
 

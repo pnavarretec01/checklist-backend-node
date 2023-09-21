@@ -4,7 +4,6 @@ const service = new SubdivisionsService();
 const create = async (req, res, next) => {
   try {
     const response = await service.create(req.body);
-    console.log(req.body);
     res.status(201).json({ success: true, code: 201, data: response, status: "success" });
   } catch (error) {
     if (error.message === "Ya existe un registro con estas características") {
