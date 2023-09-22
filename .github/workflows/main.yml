@@ -1,0 +1,24 @@
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "dev" branch
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: trigger single Job
+        uses: jabbukka/jenkins-trigger@main
+        with:
+          url: "https://jenkins.trencentral.cl"
+          job_name: "checklist-back-dev"
+          user_name: "jrequena"
+          api_token: "11fbd67cd009927f2068ad05d9e6efc68d"
+          wait: "true"
+          timeout: "1000"
