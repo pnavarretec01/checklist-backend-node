@@ -9,10 +9,11 @@ const sequelize = new Sequelize(
     config.dbPassword,
     {
       host: config.dbHost,
-      dialect: 'postgresql' ,
-      logging: false 
-    },
-    
+      dialect: "postgresql",
+      logging: false,
+      port: config.dbPort,
+      schema: config.dbSchema,
+    }
   );
 
 sequelize.sync();

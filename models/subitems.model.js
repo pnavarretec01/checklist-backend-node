@@ -1,6 +1,6 @@
 const { Model, DataTypes, Sequelize } = require("sequelize");
 
-const ITEM_TABLE = "subitem";
+const ITEM_TABLE = "subitems";
 
 class SubItem extends Model {
   static config(sequelize) {
@@ -14,7 +14,7 @@ class SubItem extends Model {
   static associate(models) {
     this.belongsTo(models.Item, {
       foreignKey: "fk_item_id",
-      as: "item",
+      as: "items",
       onDelete: "cascade",
       hooks: true,
     });
@@ -27,6 +27,7 @@ const SubItemSchema = {
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER,
+    sequenceName: 'sequence_subitems'
   },
   nombre: {
     allowNull: false,
@@ -43,7 +44,7 @@ const SubItemSchema = {
     allowNull: false,
     type: DataTypes.INTEGER,
     references: {
-      model: "item",
+      model: "items",
       key: "pk_item_id",
     },
   },

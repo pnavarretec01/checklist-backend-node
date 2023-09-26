@@ -1,7 +1,7 @@
 // modelos/caracteristicaFormulario.model.js
 const { Model, DataTypes } = require("sequelize");
 
-const CARACTERISTICA_FORMULARIO_TABLE = "CaracteristicaFormulario";
+const CARACTERISTICA_FORMULARIO_TABLE = "caracteristicasFormulario";
 
 class CaracteristicaFormulario extends Model {
   static config(sequelize) {
@@ -13,23 +13,24 @@ class CaracteristicaFormulario extends Model {
     };
   }
   static associate(models) {
-    this.belongsTo(models.Item, { foreignKey: "item_id" });
-    this.belongsTo(models.SubItem, { foreignKey: "subitem_id" });
+    this.belongsTo(models.Item, { foreignKey: "fk_item_id" });
+    this.belongsTo(models.SubItem, { foreignKey: "fk_subitem_id" });
   }
 }
 
 const CaracteristicaFormularioSchema = {
-  caracteristica_formulario_id: {
+  pk_caracteristica_formulario_id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER,
+    sequenceName: 'sequence_caracteristicas'
   },
-  item_id: {
+  fk_item_id: {
     allowNull: false,
     type: DataTypes.INTEGER,
   },
-  subitem_id: {
+  fk_subitem_id: {
     allowNull: false,
     type: DataTypes.INTEGER,
   },
@@ -45,10 +46,10 @@ const CaracteristicaFormularioSchema = {
     allowNull: true,
     type: DataTypes.STRING,
   },
-  formulario_id: {
+  fk_formulario_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: "formulario",
+      model: "formularios",
       key: "pk_formulario_id",
     },
   },

@@ -1,4 +1,5 @@
 const { models } = require("../libs/sequelize");
+const { sendEmail } = require("./mailer");
 
 class FormularioService {
   constructor() {}
@@ -34,17 +35,17 @@ class FormularioService {
     }
 
     formulario.CaracteristicaFormularios.forEach((caracteristica) => {
-      let targetSubItem = subItemMap[caracteristica.subitem_id];
+      let targetSubItem = subItemMap[caracteristica.fk_subitem_id];
       if (targetSubItem) {
         targetSubItem.data.push({
-          caracteristica_formulario_id:
-            caracteristica.caracteristica_formulario_id,
-          item_id: caracteristica.item_id,
-          subitem_id: caracteristica.subitem_id,
+          pk_caracteristica_formulario_id:
+            caracteristica.pk_caracteristica_formulario_id,
+          item_id: caracteristica.fk_item_id,
+          subitem_id: caracteristica.fk_subitem_id,
           pk: caracteristica.pk,
           collera: caracteristica.collera,
           observacion: caracteristica.observacion,
-          formulario_id: caracteristica.formulario_id,
+          formulario_id: caracteristica.fk_formulario_id,
         });
       }
     });
@@ -91,8 +92,7 @@ class FormularioService {
       code: 200,
       data: response,
     };
-}
-
+  }
 
   transformFormulario(formulario) {
     return {
@@ -105,22 +105,22 @@ class FormularioService {
       pk_termino: formulario.pk_termino,
       cerrado: formulario.cerrado,
       items: formulario.CaracteristicaFormularios.map((caracteristica) => ({
-        id: caracteristica.item_id,
+        id: caracteristica.fk_item_id,
         title: caracteristica.Item.title,
         items: [
           {
-            id: caracteristica.subitem_id,
+            id: caracteristica.fk_subitem_id,
             title: caracteristica.SubItem.title,
             data: [
               {
-                caracteristica_formulario_id:
-                  caracteristica.caracteristica_formulario_id,
-                item_id: caracteristica.item_id,
-                subitem_id: caracteristica.subitem_id,
+                pk_caracteristica_formulario_id:
+                  caracteristica.pk__caracteristica_formulario_id,
+                item_id: caracteristica.fk_item_id,
+                subitem_id: caracteristica.fk_subitem_id,
                 pk: caracteristica.pk,
                 collera: caracteristica.collera,
                 observacion: caracteristica.observacion,
-                formulario_id: caracteristica.formulario_id,
+                formulario_id: caracteristica.fk_formulario_id,
               },
             ],
           },
@@ -130,7 +130,6 @@ class FormularioService {
   }
 
   async addFormsAndFeatures(data) {
-
     const formData = {
       ...data.formulario,
       fk_subdivision_id: data.formulario.subdivision,
@@ -177,13 +176,32 @@ class FormularioService {
   }
 
   async addForm(formularioData) {
-    console.log(formularioData);
-    return await models.Formulario.create(formularioData);
+    try {
+      const formulario = await models.Formulario.create(formularioData);
+      const id = formulario.dataValues.pk_formulario_id;
+      if (formularioData.cerrado === 1) {
+        const subdivision = await this.findSubdivisionById(
+          formularioData.fk_subdivision_id
+        );
+        await sendEmail(formularioData, subdivision.nombre, id);
+      }
+
+      return formulario;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async agregarMultiplesCaracteristicas(caracteristicasData) {
+    const transformedData = caracteristicasData.map((caracteristica) => ({
+      ...caracteristica,
+      fk_item_id: caracteristica.item_id,
+      fk_formulario_id: caracteristica.formulario_id,
+      fk_subitem_id: caracteristica.subitem_id,
+    }));
+
     return await models.CaracteristicaFormulario.bulkCreate(
-      caracteristicasData
+      transformedData
     );
   }
 
@@ -248,8 +266,8 @@ class FormularioService {
               subitem.data.forEach((data) => {
                 caracteristicas.push({
                   ...data,
-                  item_id: item.pk_item_id,
-                  subitem_id: subitem.pk_subitem_id,
+                  fk_item_id: item.pk_item_id,
+                  fk_subitem_id: subitem.pk_subitem_id,
                 });
               });
             }
@@ -270,6 +288,12 @@ class FormularioService {
       await models.Formulario.update(formData, {
         where: { pk_formulario_id: pk_formulario_id },
       });
+      if (data.cerrado === 1) {
+        const subdivision = await this.findSubdivisionById(
+          data.fk_subdivision_id
+        );
+        await sendEmail(data, subdivision.nombre, pk_formulario_id);
+      }
     } catch (error) {
       throw error;
     }
@@ -278,12 +302,12 @@ class FormularioService {
   async updateCaracteristicaFormularios(formulario_id, caracteristicas) {
     try {
       await models.CaracteristicaFormulario.destroy({
-        where: { formulario_id: formulario_id },
+        where: { fk_formulario_id: formulario_id },
       });
 
       const newCaracteristicas = caracteristicas.map((caracteristica) => ({
         ...caracteristica,
-        formulario_id: formulario_id,
+        fk_formulario_id: formulario_id,
       }));
 
       await models.CaracteristicaFormulario.bulkCreate(newCaracteristicas);
@@ -296,7 +320,7 @@ class FormularioService {
     try {
       // elimina todas las CaracteristicaFormulario asociadas a ese formulario
       await models.CaracteristicaFormulario.destroy({
-        where: { formulario_id: id },
+        where: { fk_formulario_id: id },
       });
 
       // elimina el formulario
@@ -306,6 +330,14 @@ class FormularioService {
     } catch (error) {
       throw new Error("Error al eliminar el Formulario y sus Características");
     }
+  }
+
+  async findSubdivisionById(id) {
+    const subdivision = await models.Subdivision.findByPk(id);
+    if (!subdivision) {
+      throw new Error("Subdivisión no encontrada");
+    }
+    return subdivision;
   }
 }
 

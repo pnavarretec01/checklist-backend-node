@@ -13,11 +13,11 @@ const validaciones = [
 const validarCamposItems = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      const firstError = errors.array()[0].msg; // Obtiene el mensaje del primer error
+      const firstError = errors.array()[0].msg;
       return res.status(400).json({ 
         success: false, 
         code: 400, 
-        message: firstError, // Usa el mensaje del primer error como respuesta principal
+        message: firstError,
         errors: errors.array(),
         status: "error" 
       });

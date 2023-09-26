@@ -1,6 +1,6 @@
 const { Model, DataTypes, Sequelize } = require("sequelize");
 
-const SUBDIVISION_TABLE = "subdivision";
+const SUBDIVISION_TABLE = "subdivisiones";
 
 class Subdivision extends Model {
   static config(sequelize) {

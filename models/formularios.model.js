@@ -1,6 +1,6 @@
 const { Model, DataTypes, Sequelize } = require("sequelize");
 
-const FORMULARIO_TABLE = "formulario";
+const FORMULARIO_TABLE = "formularios";
 
 class Formulario extends Model {
   static config(sequelize) {
@@ -13,7 +13,7 @@ class Formulario extends Model {
   }
   static associate(models) {
     this.hasMany(models.CaracteristicaFormulario, {
-      foreignKey: "formulario_id",
+      foreignKey: "fk_formulario_id",
     });
     this.belongsTo(models.Subdivision, {
       foreignKey: "fk_subdivision_id",
@@ -28,6 +28,7 @@ const FormularioSchema = {
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER,
+    sequenceName: 'sequence_formularios'
   },
   nombre_supervisor: {
     allowNull: false,
@@ -44,23 +45,18 @@ const FormularioSchema = {
     type: DataTypes.INTEGER,
     field: "fk_subdivision_id",
   },
-  subdivision: {
-    allowNull: false,
-    type: DataTypes.STRING,
-    field: "subdivision",
-  },
   observacion_general: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.STRING,
     field: "observacion_general",
   },
   pk_inicio: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.INTEGER,
     field: "pk_inicio",
   },
   pk_termino: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.INTEGER,
     field: "pk_termino",
   },

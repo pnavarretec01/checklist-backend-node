@@ -1,6 +1,6 @@
 const { Model, DataTypes, Sequelize } = require("sequelize");
 
-const ITEM_TABLE = "item";
+const ITEM_TABLE = "items";
 
 class Item extends Model {
   static config(sequelize) {
@@ -27,6 +27,7 @@ const ItemSchema = {
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER,
+    sequenceName: 'sequence_items'
   },
   nombre: {
     allowNull: false,
