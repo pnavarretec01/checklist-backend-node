@@ -54,7 +54,7 @@ class FormularioService {
       pk_formulario_id: formulario.pk_formulario_id,
       nombre_supervisor: formulario.nombre_supervisor,
       fecha: formulario.fecha,
-      subdivision: formulario.Subdivision, // Aquí es donde se hizo el cambio
+      subdivision: formulario.Subdivision,
       observacion_general: formulario.observacion_general,
       pk_inicio: formulario.pk_inicio,
       pk_termino: formulario.pk_termino,
@@ -132,7 +132,7 @@ class FormularioService {
   async addFormsAndFeatures(data) {
     const formData = {
       ...data.formulario,
-      fk_subdivision_id: data.formulario.subdivision,
+      fk_subdivision_id: data.formulario.subdivision || data.formulario.subdivision.fk_subdivision_id,
     };
 
     const formulario = await this.addForm(formData);
@@ -179,10 +179,13 @@ class FormularioService {
     try {
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
+      console.log("pasa aca 1", id);
       if (formularioData.cerrado === 1) {
+        
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
+        console.log(subdivision);
         await sendEmail(formularioData, subdivision.nombre, id);
       }
 
@@ -200,9 +203,7 @@ class FormularioService {
       fk_subitem_id: caracteristica.subitem_id,
     }));
 
-    return await models.CaracteristicaFormulario.bulkCreate(
-      transformedData
-    );
+    return await models.CaracteristicaFormulario.bulkCreate(transformedData);
   }
 
   async findById(id) {
@@ -250,7 +251,8 @@ class FormularioService {
   //edicion
   async handleEditFormulario(body) {
     const { pk_formulario_id, items, ...formData } = body;
-    formData.fk_subdivision_id = formData.subdivision;
+    formData.fk_subdivision_id = formData.subdivision || formData.subdivision.fk_subdivision_id;
+    console.log("pasa aca 2", formData.fk_subdivision_id );
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,
@@ -290,7 +292,7 @@ class FormularioService {
       });
       if (data.cerrado === 1) {
         const subdivision = await this.findSubdivisionById(
-          data.fk_subdivision_id
+          data.fk_subdivision_id || data.subdivision.fk_subdivision_id 
         );
         await sendEmail(data, subdivision.nombre, pk_formulario_id);
       }
