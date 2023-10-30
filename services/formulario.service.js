@@ -132,7 +132,9 @@ class FormularioService {
   async addFormsAndFeatures(data) {
     const formData = {
       ...data.formulario,
-      fk_subdivision_id: data.formulario.subdivision || data.formulario.subdivision.fk_subdivision_id,
+      fk_subdivision_id:
+        data.formulario.subdivision ||
+        data.formulario.subdivision.fk_subdivision_id,
     };
 
     const formulario = await this.addForm(formData);
@@ -172,6 +174,7 @@ class FormularioService {
           as: "Subdivision",
         },
       ],
+      order: [["createdAt", "DESC"]],
     });
   }
 
@@ -180,7 +183,6 @@ class FormularioService {
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
       if (formularioData.cerrado === 1) {
-        
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
@@ -249,7 +251,8 @@ class FormularioService {
   //edicion
   async handleEditFormulario(body) {
     const { pk_formulario_id, items, ...formData } = body;
-    formData.fk_subdivision_id = formData.subdivision || formData.subdivision.fk_subdivision_id;
+    formData.fk_subdivision_id =
+      formData.subdivision || formData.subdivision.fk_subdivision_id;
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,
@@ -289,7 +292,7 @@ class FormularioService {
       });
       if (data.cerrado === 1) {
         const subdivision = await this.findSubdivisionById(
-          data.fk_subdivision_id || data.subdivision.fk_subdivision_id 
+          data.fk_subdivision_id || data.subdivision.fk_subdivision_id
         );
         await sendEmail(data, subdivision.nombre, pk_formulario_id);
       }
