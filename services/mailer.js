@@ -39,7 +39,7 @@ async function sendEmail(data, subdivision, idFormulario) {
     </tr>
     <tr bgcolor="#fff">
         <td style="text-align:center">
-            <p style="color: #000">Dirigase a la aplicacion para obtener mas detalles.</p>
+            <p style="color: #000">DIRÍJASE A LA APLICACIÓN PARA OBTENER MÁS DETALLES.</p>
         </td>
     </tr>
 </table>

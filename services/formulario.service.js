@@ -184,7 +184,6 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
-        console.log(subdivision);
         await sendEmail(formularioData, subdivision.nombre, id);
       }
 
