@@ -1,5 +1,5 @@
 const nodemailer = require("nodemailer");
-require('dotenv').config();
+require("dotenv").config();
 
 const transporter = nodemailer.createTransport({
   host: "smtp.office365.com",
@@ -12,18 +12,17 @@ const transporter = nodemailer.createTransport({
   tls: {
     ciphers: "SSLv3",
   },
-  connectionTimeout: 60000 ,
-  debug: true
+  connectionTimeout: 60000,
+  debug: true,
 });
-transporter.on('log', log => {
+transporter.on("log", (log) => {
   console.log(log);
 });
-
 
 async function sendEmail(data, subdivision, idFormulario) {
   const mailOptions = {
     from: "Checklist EFE <adminsharepoint@grupoefe.onmicrosoft.com>",
-    to: "patricio.navarrete@efe.cl",
+    to: "patricio.navarrete@efe.cl, luis.avalos@efe.cl",
     subject: `Cierre Checklist ${idFormulario}`,
     html: `
     <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#002854" bgcolor="#002854">

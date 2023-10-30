@@ -179,7 +179,6 @@ class FormularioService {
     try {
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
-      console.log("pasa aca 1", id);
       if (formularioData.cerrado === 1) {
         
         const subdivision = await this.findSubdivisionById(
@@ -252,7 +251,6 @@ class FormularioService {
   async handleEditFormulario(body) {
     const { pk_formulario_id, items, ...formData } = body;
     formData.fk_subdivision_id = formData.subdivision || formData.subdivision.fk_subdivision_id;
-    console.log("pasa aca 2", formData.fk_subdivision_id );
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,
