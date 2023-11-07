@@ -16,43 +16,77 @@ class SubItemsService {
   }
 
   async create(data) {
-    const existeSubItem = await models.SubItem.findOne({
-      where: {
-        [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
-        fk_item_id: data.fk_item_id,
-      },
-    });
+    const transaction = await sequelize.transaction();
+    try {
+      const existingSubItem = await models.SubItem.findOne({
+        where: {
+          orden: data.orden,
+          fk_item_id: data.fk_item_id,
+        },
+        transaction,
+      });
 
-    if (existeSubItem) {
-      throw new Error("Ya existe un registro con estas características");
+      if (existingSubItem) {
+        await models.SubItem.update(
+          { orden: sequelize.literal("orden + 1") },
+          {
+            where: {
+              orden: { [Op.gte]: data.orden },
+              fk_item_id: data.fk_item_id,
+            },
+            transaction,
+          }
+        );
+      }
+
+      // Crea el nuevo subitem
+      const res = await models.SubItem.create(data, { transaction });
+      await transaction.commit();
+      return res;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
     }
-
-    const res = await models.SubItem.create(data);
-    return res;
   }
 
   async update(id, data) {
-    const model = await this.findOne(id);
+    const transaction = await sequelize.transaction();
+    try {
+      const model = await this.findOne(id);
 
-    if (
-      (data.orden !== undefined && data.orden !== model.orden) ||
-      (data.nombre !== undefined && data.nombre !== model.nombre)
-    ) {
-      const existingItem = await models.SubItem.findOne({
-        where: {
-          [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
-          [Op.not]: { pk_subitem_id: id },
-          fk_item_id: model.fk_item_id, // Asegúrate de que estás buscando solo dentro del mismo item
-        },
-      });
+      if (data.orden !== undefined && data.orden !== model.orden) {
+        const existingSubItem = await models.SubItem.findOne({
+          where: {
+            orden: data.orden,
+            fk_item_id: model.fk_item_id,
+            [Op.not]: { pk_subitem_id: id },
+          },
+          transaction,
+        });
 
-      if (existingItem) {
-        throw new Error("Ya existe un Subitem con el mismo orden o nombre");
+        if (existingSubItem) {
+          await models.SubItem.update(
+            { orden: sequelize.literal("orden + 1") },
+            {
+              where: {
+                orden: { [Op.gte]: data.orden },
+                fk_item_id: model.fk_item_id,
+                pk_subitem_id: { [Op.not]: id },
+              },
+              transaction,
+            }
+          );
+        }
       }
-    }
 
-    const res = await model.update(data);
-    return res;
+      // Actualiza el subitem
+      const res = await model.update(data, { transaction });
+      await transaction.commit();
+      return res;
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
   }
 
   async delete(id) {

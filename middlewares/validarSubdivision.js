@@ -4,18 +4,16 @@ const validacionesSubdivision = [
   check("nombre").not().isEmpty().withMessage("El campo nombre es requerido."),
 
   check("pk_inicio")
-    .not()
-    .isEmpty()
+    .custom((value) => value !== null && value !== undefined)
     .withMessage("El campo Pk Inicio es requerido.")
-    .isInt()
-    .withMessage("El campo Pk Inicio debe ser un número entero."),
+    .isInt({ min: 0 })
+    .withMessage("El campo Pk Inicio debe ser un número entero no negativo."),
 
   check("pk_termino")
-    .not()
-    .isEmpty()
+    .custom((value) => value !== null && value !== undefined)
     .withMessage("El campo Pk Término es requerido.")
-    .isInt()
-    .withMessage("El campo Pk Término debe ser un número entero."),
+    .isInt({ min: 0 })
+    .withMessage("El campo Pk Término debe ser un número entero no negativo."),
 ];
 
 const validarCamposSubdivision = (req, res, next) => {

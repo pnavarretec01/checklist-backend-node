@@ -46,17 +46,28 @@ class ItemsService {
   async create(data) {
     const transaction = await sequelize.transaction();
     try {
-      const existeItem = await models.Item.findOne({
+      // verifica si ya existe un item con el mismo orden
+      const existingItem = await models.Item.findOne({
         where: {
-          [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
+          orden: data.orden,
         },
         transaction,
       });
 
-      if (existeItem) {
-        throw new Error("Ya existe un registro con estas características");
+      // si existe, actualiza el orden de todos los items afectados
+      if (existingItem) {
+        await models.Item.update(
+          { orden: sequelize.literal("orden + 1") },
+          {
+            where: {
+              orden: { [Op.gte]: data.orden },
+            },
+            transaction,
+          }
+        );
       }
 
+      // crea el nuevo ítem
       const res = await models.Item.create(data, { transaction });
       await transaction.commit();
       return res;
@@ -69,22 +80,42 @@ class ItemsService {
   async update(id, data) {
     const transaction = await sequelize.transaction();
     try {
-      const model = await this.findOne(id);
+      const model = await this.findOneItem(id);
 
-      if (
-        (data.orden !== undefined && data.orden !== model.orden) ||
-        (data.nombre !== undefined && data.nombre !== model.nombre)
-      ) {
-        const existingItem = await models.Item.findOne({
+      if (data.nombre && data.nombre !== model.nombre) {
+        const existingItemWithName = await models.Item.findOne({
           where: {
-            [Op.or]: [{ orden: data.orden }, { nombre: data.nombre }],
+            nombre: data.nombre,
             [Op.not]: { pk_item_id: id },
           },
           transaction,
         });
 
-        if (existingItem) {
-          throw new Error("Ya existe un item con el mismo orden o nombre");
+        if (existingItemWithName) {
+          throw new Error("Ya existe un ítem con el mismo nombre.");
+        }
+      }
+
+      if (data.orden !== undefined && data.orden !== model.orden) {
+        const existingItemWithOrder = await models.Item.findOne({
+          where: {
+            orden: data.orden,
+            [Op.not]: { pk_item_id: id },
+          },
+          transaction,
+        });
+
+        if (existingItemWithOrder) {
+          await models.Item.update(
+            { orden: sequelize.literal("orden + 1") },
+            {
+              where: {
+                orden: { [Op.gte]: data.orden },
+                pk_item_id: { [Op.not]: id },
+              },
+              transaction,
+            }
+          );
         }
       }
 
