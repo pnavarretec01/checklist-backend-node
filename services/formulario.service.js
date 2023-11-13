@@ -1,5 +1,6 @@
 const { models } = require("../libs/sequelize");
 const { sendEmail } = require("./mailer");
+const { Op } = require("sequelize");
 
 class FormularioService {
   constructor() {}
@@ -239,6 +240,9 @@ class FormularioService {
 
   async findAllItemsWithSubItems() {
     return await models.Item.findAll({
+      where: {
+        eliminado: { [Op.or]: [false, null] },
+      },
       include: [
         {
           model: models.SubItem,

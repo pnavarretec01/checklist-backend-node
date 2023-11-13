@@ -5,7 +5,11 @@ class SubdivisionsService {
   constructor() {}
 
   async find() {
-    const res = await models.Subdivision.findAll();
+    const res = await models.Subdivision.findAll({
+      where: {
+        eliminado: { [Op.or]: [false, null] },
+      },
+    });
     return res;
   }
 
@@ -49,13 +53,23 @@ class SubdivisionsService {
     return res;
   }
 
+  // async delete(id) {
+  //   const model = await this.findOne(id);
+  //   if (!model) {
+  //     throw new Error("Elemento no encontrado");
+  //   }
+
+  //   await model.destroy();
+  //   return { deleted: true };
+  // }
+
   async delete(id) {
     const model = await this.findOne(id);
     if (!model) {
       throw new Error("Elemento no encontrado");
     }
 
-    await model.destroy();
+    await model.update({ eliminado: true });
     return { deleted: true };
   }
 }

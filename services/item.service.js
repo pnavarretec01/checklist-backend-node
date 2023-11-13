@@ -7,6 +7,9 @@ class ItemsService {
 
   async find() {
     const res = await models.Item.findAll({
+      where: {
+        eliminado: { [Op.or]: [false, null] },
+      },
       include: [
         {
           model: models.SubItem,
@@ -128,22 +131,35 @@ class ItemsService {
     }
   }
 
+  // async delete(id) {
+  //   try {
+  //     const model = await this.findOne(id);
+  //     if (!model) {
+  //       throw new Error("Elemento no encontrado");
+  //     }
+
+  //     // Eliminar subitems primero
+  //     await models.SubItem.destroy({
+  //       where: {
+  //         fk_item_id: id,
+  //       },
+  //     });
+
+  //     // Ahora, eliminar el item principal
+  //     await model.destroy();
+  //     return { deleted: true };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
   async delete(id) {
     try {
-      const model = await this.findOne(id);
+      const model = await this.findOneItem(id);
       if (!model) {
         throw new Error("Elemento no encontrado");
       }
 
-      // Eliminar subitems primero
-      await models.SubItem.destroy({
-        where: {
-          fk_item_id: id,
-        },
-      });
-
-      // Ahora, eliminar el item principal
-      await model.destroy();
+      await model.update({ eliminado: true });
       return { deleted: true };
     } catch (error) {
       throw error;

@@ -52,6 +52,12 @@ const SubdivisionSchema = {
     allowNull: false,
     defaultValue: Sequelize.NOW,
   },
+  eliminado: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: "eliminado",
+  },
 };
 
 module.exports = { Subdivision, SubdivisionSchema };

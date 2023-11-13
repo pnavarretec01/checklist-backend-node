@@ -27,7 +27,7 @@ const ItemSchema = {
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER,
-    sequenceName: 'sequence_items'
+    sequenceName: "sequence_items",
   },
   nombre: {
     allowNull: false,
@@ -49,7 +49,13 @@ const ItemSchema = {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: Sequelize.NOW,
-  }  
+  },
+  eliminado: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+    field: "eliminado",
+  },
 };
 
 module.exports = { Item, ItemSchema };
