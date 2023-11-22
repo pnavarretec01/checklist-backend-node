@@ -372,10 +372,8 @@ class FormularioService {
 
     let formulario;
     if (data.formulario.pk_formulario_id) {
-      console.log("entra add");
       formulario = await this.updateFormulario(formData, data);
     } else {
-      console.log("entra upd");
       formulario = await this.addForm(formData, data);
     }
 

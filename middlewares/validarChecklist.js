@@ -45,28 +45,35 @@ const validaciones = [
 ];
 
 const validacionesPut = [
-  body("pk_formulario_id")
+  body("formulario.pk_formulario_id")
     .isInt()
     .withMessage("El ID del formulario debe ser un número entero."),
-  body("nombre_supervisor")
+
+  body("formulario.nombre_supervisor")
     .notEmpty()
     .withMessage("El Nombre Supervisor es requerido."),
-  body("fecha").notEmpty().withMessage("La Fecha es requerida."),
-  body("subdivision")
+
+  body("formulario.fecha").notEmpty().withMessage("La Fecha es requerida."),
+
+  body("formulario.subdivision")
     .exists({ checkNull: true })
     .withMessage("El campo Subdivisión es requerido.")
     .isInt({ min: 1 })
     .withMessage("La Subdivisión debe ser un identificador válido."),
-  body("pk_inicio")
+
+  body("formulario.pk_inicio")
     .optional()
     .isInt({ min: 0 })
     .withMessage("El PK Inicio debe ser un número entero positivo."),
-  body("pk_termino")
+
+  body("formulario.pk_termino")
     .optional()
     .isInt({ min: 0 })
     .withMessage("El PK Término debe ser un número entero positivo."),
-  body("observacion_general").optional(),
-  body("cerrado")
+
+  body("formulario.observacion_general").optional(),
+
+  body("formulario.cerrado")
     .isBoolean()
     .withMessage("El campo Cerrado debe ser booleano."),
 ];

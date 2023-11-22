@@ -130,7 +130,7 @@ async function sendEmail(data, subdivision, idFormulario, dataForm) {
         ${itemsHtml}
         <tr bgcolor="#002854">
           <td style="text-align:center; color: #ffffff; padding: 10px;">
-            <p>DIRÍJASE A LA <strong><a href="${process.env.OUTLOOK_EMAIL}" style="color: #e84393; text-decoration: none;">APLICACION</a></strong> PARA OBTENER MÁS DETALLES.</p>
+            <p>DIRÍJASE A LA <strong><a href="${process.env.URLWEB}" style="color: #e84393; text-decoration: none;">APLICACION</a></strong> PARA OBTENER MÁS DETALLES.</p>
           </td>
         </tr>
       </table>
