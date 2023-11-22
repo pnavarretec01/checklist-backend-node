@@ -22,6 +22,7 @@ class SubdivisionsService {
     const existingSubdivision = await models.Subdivision.findOne({
       where: {
         nombre: data.nombre,
+        [Op.not]: { eliminado: true },
       },
     });
 
@@ -41,6 +42,7 @@ class SubdivisionsService {
         where: {
           nombre: data.nombre,
           [Op.not]: { pk_subdivision_id: id },
+          [Op.not]: { eliminado: true },
         },
       });
 

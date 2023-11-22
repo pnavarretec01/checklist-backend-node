@@ -15,9 +15,6 @@ const transporter = nodemailer.createTransport({
   connectionTimeout: 60000,
   debug: true,
 });
-transporter.on("log", (log) => {
-  console.log(log);
-});
 
 function formatDateTime(date) {
   const d = new Date(date),
@@ -33,40 +30,117 @@ function formatDateTime(date) {
   return `${year}-${month}-${day} ${hh}:${mm}`;
 }
 
-async function sendEmail(data, subdivision, idFormulario) {
+function formatItemsForEmail(dataForm) {
+  if (!dataForm || !dataForm.features || dataForm.features.length === 0) {
+    return "";
+  }
+  const itemsMap = dataForm.features.reduce((acc, feature) => {
+    if (!acc[feature.nombreItem]) {
+      acc[feature.nombreItem] = {
+        nombre: feature.nombreItem,
+        subitems: {},
+      };
+    }
+
+    if (!acc[feature.nombreItem].subitems[feature.nombreSubitem]) {
+      acc[feature.nombreItem].subitems[feature.nombreSubitem] = {
+        nombre: feature.nombreSubitem,
+        data: [],
+      };
+    }
+
+    acc[feature.nombreItem].subitems[feature.nombreSubitem].data.push({
+      pk: feature.pk,
+      collera: feature.collera,
+      observacion: feature.observacion,
+    });
+
+    return acc;
+  }, {});
+
+  let htmlContent =
+    '<table border="1" style="border-collapse: collapse; width: 100%;">';
+
+  Object.values(itemsMap).forEach((item) => {
+    htmlContent += `
+      <tr>
+        <th colspan="4" style="background-color: #eeeeee;">${item.nombre}</th>
+      </tr>
+      <tr>
+        <th>Subitem</th>
+        <th>PK</th>
+        <th>Collera</th>
+        <th>Observación</th>
+      </tr>`;
+
+    Object.values(item.subitems).forEach((subitem) => {
+      subitem.data.forEach((dataEntry, index) => {
+        htmlContent += `
+          <tr>
+            ${
+              index === 0
+                ? `<td rowspan="${subitem.data.length}">${subitem.nombre}</td>`
+                : ""
+            }
+            <td>${dataEntry.pk}</td>
+            <td>${dataEntry.collera}</td>
+            <td>${dataEntry.observacion}</td>
+          </tr>`;
+      });
+    });
+  });
+
+  htmlContent += "</table>";
+  return htmlContent;
+}
+
+async function sendEmail(data, subdivision, idFormulario, dataForm) {
   const fechaLocal = formatDateTime(data.fecha);
+  const itemsSection =
+    dataForm.features.length > 0 ? formatItemsForEmail(dataForm) : "";
+
+  const itemsHtml = itemsSection
+    ? `
+    <tr bgcolor="#fff">
+      <td style="text-align:center">
+        <p style="color: #000">Detalle de los ítems:</p>
+        ${itemsSection}
+      </td>
+    </tr>
+  `
+    : "";
 
   const mailOptions = {
     from: "Checklist EFE <adminsharepoint@grupoefe.onmicrosoft.com>",
-    to: "patricio.navarrete@efe.cl, luis.avalos@efe.cl",
+    to: "patricio.navarrete@efe.cl",
     subject: `Cierre Checklist ${idFormulario}`,
     html: `
-    <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#002854" bgcolor="#002854">
-    <tr height="200px">  
-        <td bgcolor="" width="600px">
+      <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#002854" bgcolor="#002854">
+        <tr height="200px">  
+          <td bgcolor="" width="600px">
             <h1 style="color: #fff; text-align:center">Checklist EFE</h1>
             <p  style="color: #fff; text-align:center">
-                El usuario <span style="color: #e84393">${data.nombre_supervisor}</span> 
-                ha cerrado un Checklist con fecha de creacion <span style="color: #e84393">${fechaLocal}</span>
-                correspondiente a la subdivision <span style="color: #e84393">${subdivision}</span>
-                con la observacion "<span style="color: #e84393">${data.observacion_general}</span>".
+              El usuario <span style="color: #e84393">${data.nombre_supervisor}</span> 
+              ha cerrado un Checklist con fecha de creacion <span style="color: #e84393">${fechaLocal}</span>
+              correspondiente a la subdivision <span style="color: #e84393">${subdivision}</span>
+              con la observacion "<span style="color: #e84393">${data.observacion_general}</span>".
             </p>
-        </td>
-    </tr>
-    <tr bgcolor="#fff">
-        <td style="text-align:center">
-            <p style="color: #000">DIRÍJASE A LA APLICACIÓN PARA OBTENER MÁS DETALLES.</p>
-        </td>
-    </tr>
-</table>
-`,
+          </td>
+        </tr>
+        ${itemsHtml}
+        <tr bgcolor="#002854">
+          <td style="text-align:center; color: #ffffff; padding: 10px;">
+            <p>DIRÍJASE A LA APLICACIÓN PARA OBTENER MÁS DETALLES.</p>
+          </td>
+        </tr>
+      </table>
+    `,
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    //console.log("Correo enviado con éxito");
   } catch (error) {
-    //console.error("Error al enviar el correo:", error);
+    console.error("Error al enviar el correo:", error);
   }
 }
 

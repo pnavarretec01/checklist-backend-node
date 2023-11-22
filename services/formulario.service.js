@@ -138,7 +138,7 @@ class FormularioService {
         data.formulario.subdivision.fk_subdivision_id,
     };
 
-    const formulario = await this.addForm(formData);
+    const formulario = await this.addForm(formData, data);
 
     const caracteristicasData = data.features.map((caracteristica) => ({
       ...caracteristica,
@@ -179,7 +179,7 @@ class FormularioService {
     });
   }
 
-  async addForm(formularioData) {
+  async addForm(formularioData, dataCompleta) {
     try {
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
@@ -187,7 +187,7 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
-        await sendEmail(formularioData, subdivision.nombre, id);
+        await sendEmail(formularioData, subdivision.nombre, id, dataCompleta);
       }
 
       return formulario;
@@ -290,16 +290,21 @@ class FormularioService {
 
   async updateFormulario(data) {
     try {
-      const { pk_formulario_id, ...formData } = data;
-      await models.Formulario.update(formData, {
-        where: { pk_formulario_id: pk_formulario_id },
+      await models.Formulario.update(data, {
+        where: { pk_formulario_id: data.pk_formulario_id },
       });
-      if (data.cerrado === 1) {
+
+      // Recuperar y devolver el formulario actualizado
+      const updatedFormulario = await models.Formulario.findByPk(
+        data.pk_formulario_id
+      );
+      if (data.cerrado === 1 && updatedFormulario) {
         const subdivision = await this.findSubdivisionById(
           data.fk_subdivision_id || data.subdivision.fk_subdivision_id
         );
-        await sendEmail(data, subdivision.nombre, pk_formulario_id);
+        await sendEmail(data, subdivision.nombre, data.pk_formulario_id);
       }
+      return updatedFormulario;
     } catch (error) {
       throw error;
     }
@@ -344,6 +349,52 @@ class FormularioService {
       throw new Error("Subdivisión no encontrada");
     }
     return subdivision;
+  }
+  async addOrUpdateForm(data) {
+    const formData = {
+      ...data.formulario,
+      fk_subdivision_id:
+        data.formulario.subdivision?.fk_subdivision_id ||
+        data.formulario.subdivision,
+    };
+
+    let formulario;
+    if (data.formulario.pk_formulario_id) {
+      // Actualizar formulario existente
+      formulario = await this.updateFormulario(formData, data);
+    } else {
+      // Crear nuevo formulario
+      formulario = await this.addForm(formData, data);
+    }
+
+    // Procesar características
+    const caracteristicasData = data.features.map((caracteristica) => ({
+      ...caracteristica,
+      formulario_id: formulario.pk_formulario_id,
+    }));
+
+    const caracteristicas = await this.agregarOActualizarCaracteristicas(
+      caracteristicasData,
+      formulario.pk_formulario_id
+    );
+
+    return { formulario, caracteristicas };
+  }
+  async agregarOActualizarCaracteristicas(caracteristicasData, formularioId) {
+    // Si se está actualizando, primero elimina las características existentes
+    if (formularioId) {
+      await models.CaracteristicaFormulario.destroy({
+        where: { fk_formulario_id: formularioId },
+      });
+    }
+
+    // Crear nuevas características
+    const newCaracteristicas = caracteristicasData.map((caracteristica) => ({
+      ...caracteristica,
+      fk_formulario_id: formularioId,
+    }));
+
+    return await models.CaracteristicaFormulario.bulkCreate(newCaracteristicas);
   }
 }
 

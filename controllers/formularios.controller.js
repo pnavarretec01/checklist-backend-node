@@ -69,11 +69,21 @@ const deleteFormulario = async (req, res) => {
   }
 };
 
+const addOrUpdateFormulario = async (req, res) => {
+  try {
+    const result = await service.addOrUpdateForm(req.body);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).send({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   get,
   getById,
   addFeature,
   addForms,
   editFormulario,
-  deleteFormulario
+  deleteFormulario,
+  addOrUpdateFormulario,
 };

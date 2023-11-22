@@ -53,6 +53,7 @@ class ItemsService {
       const existingItem = await models.Item.findOne({
         where: {
           orden: data.orden,
+          [Op.not]: { eliminado: true },
         },
         transaction,
       });
@@ -90,6 +91,7 @@ class ItemsService {
           where: {
             nombre: data.nombre,
             [Op.not]: { pk_item_id: id },
+            [Op.not]: { eliminado: true },
           },
           transaction,
         });

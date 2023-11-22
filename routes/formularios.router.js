@@ -11,13 +11,18 @@ router
   .get("/", formulariosControllers.get)
   .get("/:id", formulariosControllers.getById)
   .post("/add-feature", formulariosControllers.addFeature)
-  .post("/", validaciones, validarCamposItems, formulariosControllers.addForms)
+  .post(
+    "/",
+    validaciones,
+    validarCamposItems,
+    formulariosControllers.addOrUpdateFormulario
+  ) // Actualizado
   .put(
     "/:id",
     validacionesPut,
     validarCamposItems,
-    formulariosControllers.editFormulario
-  )
+    formulariosControllers.addOrUpdateFormulario
+  ) // Actualizado
   .delete("/:id", formulariosControllers.deleteFormulario);
 
 module.exports = router;
