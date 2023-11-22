@@ -112,7 +112,7 @@ async function sendEmail(data, subdivision, idFormulario, dataForm) {
 
   const mailOptions = {
     from: "Checklist EFE <adminsharepoint@grupoefe.onmicrosoft.com>",
-    to: "patricio.navarrete@efe.cl",
+    to: "patricio.navarrete@efe.cl, luis.avalos@efe.cl, ricardo.gonzalez@efecentral.cl",
     subject: `Cierre Checklist ${idFormulario}`,
     html: `
       <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#002854" bgcolor="#002854">
