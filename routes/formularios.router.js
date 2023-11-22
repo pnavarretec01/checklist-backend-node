@@ -16,13 +16,13 @@ router
     validaciones,
     validarCamposItems,
     formulariosControllers.addOrUpdateFormulario
-  ) // Actualizado
+  )
   .put(
     "/:id",
     validacionesPut,
     validarCamposItems,
     formulariosControllers.addOrUpdateFormulario
-  ) // Actualizado
+  )
   .delete("/:id", formulariosControllers.deleteFormulario);
 
 module.exports = router;

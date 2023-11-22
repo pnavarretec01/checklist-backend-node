@@ -302,7 +302,12 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           data.fk_subdivision_id || data.subdivision.fk_subdivision_id
         );
-        await sendEmail(data, subdivision.nombre, data.pk_formulario_id, dataCompleta);
+        await sendEmail(
+          data,
+          subdivision.nombre,
+          data.pk_formulario_id,
+          dataCompleta
+        );
       }
       return updatedFormulario;
     } catch (error) {
@@ -351,6 +356,13 @@ class FormularioService {
     return subdivision;
   }
   async addOrUpdateForm(data) {
+    if (
+      data.formulario.pk_formulario_id &&
+      String(data.formulario.pk_formulario_id).includes("a")
+    ) {
+      delete data.formulario.pk_formulario_id;
+    }
+
     const formData = {
       ...data.formulario,
       fk_subdivision_id:
@@ -360,14 +372,13 @@ class FormularioService {
 
     let formulario;
     if (data.formulario.pk_formulario_id) {
-      // Actualizar formulario existente
+      console.log("entra add");
       formulario = await this.updateFormulario(formData, data);
     } else {
-      // Crear nuevo formulario
+      console.log("entra upd");
       formulario = await this.addForm(formData, data);
     }
 
-    // Procesar características
     const caracteristicasData = data.features.map((caracteristica) => ({
       ...caracteristica,
       formulario_id: formulario.pk_formulario_id,
@@ -380,6 +391,7 @@ class FormularioService {
 
     return { formulario, caracteristicas };
   }
+
   async agregarOActualizarCaracteristicas(caracteristicasData, formularioId) {
     // Si se está actualizando, primero elimina las características existentes
     if (formularioId) {
