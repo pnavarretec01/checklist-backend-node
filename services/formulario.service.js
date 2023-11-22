@@ -288,7 +288,7 @@ class FormularioService {
     );
   }
 
-  async updateFormulario(data) {
+  async updateFormulario(data, dataCompleta) {
     try {
       await models.Formulario.update(data, {
         where: { pk_formulario_id: data.pk_formulario_id },
@@ -302,7 +302,7 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           data.fk_subdivision_id || data.subdivision.fk_subdivision_id
         );
-        await sendEmail(data, subdivision.nombre, data.pk_formulario_id);
+        await sendEmail(data, subdivision.nombre, data.pk_formulario_id, dataCompleta);
       }
       return updatedFormulario;
     } catch (error) {
