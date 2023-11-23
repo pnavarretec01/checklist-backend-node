@@ -187,7 +187,7 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
-        await sendEmail(formularioData, subdivision.nombre, id, dataCompleta);
+        sendEmail(formularioData, subdivision.nombre, id, dataCompleta);
       }
 
       return formulario;
@@ -302,7 +302,7 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           data.fk_subdivision_id || data.subdivision.fk_subdivision_id
         );
-        await sendEmail(
+        sendEmail(
           data,
           subdivision.nombre,
           data.pk_formulario_id,
