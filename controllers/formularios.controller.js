@@ -12,7 +12,12 @@ const get = async (req, res) => {
 
 const addForms = async (req, res) => {
   try {
-    const result = await service.addFormsAndFeatures(req.body);
+    const userInfo = {
+      email: req.kauth.grant.access_token.content.email,
+      name: req.kauth.grant.access_token.content.name,
+    };
+
+    const result = await service.addFormsAndFeatures(req.body, userInfo);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
@@ -39,7 +44,12 @@ const addFeature = async (req, res) => {
 
 const editFormulario = async (req, res) => {
   try {
-    await service.handleEditFormulario(req.body);
+    const userInfo = {
+      email: req.kauth.grant.access_token.content.email,
+      name: req.kauth.grant.access_token.content.name,
+    };
+
+    await service.handleEditFormulario(req.body, userInfo);
     res.status(200).json({
       success: true,
       message: "Formulario editado exitosamente!",
@@ -71,7 +81,12 @@ const deleteFormulario = async (req, res) => {
 
 const addOrUpdateFormulario = async (req, res) => {
   try {
-    const result = await service.addOrUpdateForm(req.body);
+    const userInfo = {
+      email: req.kauth.grant.access_token.content.email,
+      name: req.kauth.grant.access_token.content.name,
+    };
+
+    const result = await service.addOrUpdateForm(req.body, userInfo);
     res.json({ success: true, data: result });
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });

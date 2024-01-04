@@ -18,14 +18,12 @@ const transporter = nodemailer.createTransport({
 
 function formatDateTime(date) {
   const d = new Date(date),
-    month = "" + (d.getMonth() + 1),
-    day = "" + d.getDate(),
+    month = ("0" + (d.getMonth() + 1)).slice(-2),
+    day = ("0" + d.getDate()).slice(-2),
     year = d.getFullYear(),
-    hh = d.getHours(),
-    mm = d.getMinutes();
-
-  if (month.length < 2) month = "0" + month;
-  if (day.length < 2) day = "0" + day;
+    hh = ("0" + d.getHours()).slice(-2),
+    mm = ("0" + d.getMinutes()).slice(-2),
+    ss = "00";
 
   return `${year}-${month}-${day} ${hh}:${mm}`;
 }
@@ -94,7 +92,7 @@ function formatItemsForEmail(dataForm) {
   return htmlContent;
 }
 
-async function sendEmail(data, subdivision, idFormulario, dataForm) {
+async function sendEmail(data, subdivision, idFormulario, dataForm, userInfo) {
   const fechaLocal = formatDateTime(data.fecha);
   const itemsSection =
     dataForm.features.length > 0 ? formatItemsForEmail(dataForm) : "";
@@ -112,7 +110,7 @@ async function sendEmail(data, subdivision, idFormulario, dataForm) {
 
   const mailOptions = {
     from: "Checklist EFE <adminsharepoint@grupoefe.onmicrosoft.com>",
-    to: "patricio.navarrete@efe.cl, luis.avalos@efe.cl, ricardo.gonzalez@efecentral.cl",
+    to: `ricardo.gonzalez@efecentral.cl, ${userInfo.email}`,
     subject: `Cierre Checklist ${idFormulario}`,
     html: `
       <table border="0" cellpadding="0" cellspacing="0" width="600px" background-color="#002854" bgcolor="#002854">
@@ -120,7 +118,7 @@ async function sendEmail(data, subdivision, idFormulario, dataForm) {
           <td bgcolor="" width="600px">
             <h1 style="color: #fff; text-align:center">Checklist EFE</h1>
             <p  style="color: #fff; text-align:center">
-              El usuario <span style="color: #e84393">${data.nombre_supervisor}</span> 
+              El usuario <span style="color: #e84393">${userInfo.name}</span> 
               ha cerrado un Checklist con fecha de creacion <span style="color: #e84393">${fechaLocal}</span>
               correspondiente a la subdivision <span style="color: #e84393">${subdivision}</span>
               con la observacion "<span style="color: #e84393">${data.observacion_general}</span>".

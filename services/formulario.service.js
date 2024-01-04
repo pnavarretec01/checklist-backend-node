@@ -130,7 +130,7 @@ class FormularioService {
     };
   }
 
-  async addFormsAndFeatures(data) {
+  async addFormsAndFeatures(data, userInfo) {
     const formData = {
       ...data.formulario,
       fk_subdivision_id:
@@ -138,7 +138,7 @@ class FormularioService {
         data.formulario.subdivision.fk_subdivision_id,
     };
 
-    const formulario = await this.addForm(formData, data);
+    const formulario = await this.addForm(formData, data, userInfo);
 
     const caracteristicasData = data.features.map((caracteristica) => ({
       ...caracteristica,
@@ -179,7 +179,7 @@ class FormularioService {
     });
   }
 
-  async addForm(formularioData, dataCompleta) {
+  async addForm(formularioData, dataCompleta, userInfo) {
     try {
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
@@ -187,7 +187,7 @@ class FormularioService {
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
-        sendEmail(formularioData, subdivision.nombre, id, dataCompleta);
+        sendEmail(formularioData, subdivision.nombre, id, dataCompleta, userInfo);
       }
 
       return formulario;
@@ -253,14 +253,14 @@ class FormularioService {
   }
 
   //edicion
-  async handleEditFormulario(body) {
+  async handleEditFormulario(body, userInfo) {
     const { pk_formulario_id, items, ...formData } = body;
     formData.fk_subdivision_id =
       formData.subdivision || formData.subdivision.fk_subdivision_id;
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,
-      ...formData,
+      ...formData, userInfo
     });
 
     let caracteristicas = [];
@@ -288,7 +288,7 @@ class FormularioService {
     );
   }
 
-  async updateFormulario(data, dataCompleta) {
+  async updateFormulario(data, dataCompleta, userInfo) {
     try {
       await models.Formulario.update(data, {
         where: { pk_formulario_id: data.pk_formulario_id },
@@ -306,7 +306,8 @@ class FormularioService {
           data,
           subdivision.nombre,
           data.pk_formulario_id,
-          dataCompleta
+          dataCompleta,
+          userInfo
         );
       }
       return updatedFormulario;
@@ -355,7 +356,7 @@ class FormularioService {
     }
     return subdivision;
   }
-  async addOrUpdateForm(data) {
+  async addOrUpdateForm(data, userInfo) {
     if (
       data.formulario.pk_formulario_id &&
       String(data.formulario.pk_formulario_id).includes("a")
@@ -372,9 +373,9 @@ class FormularioService {
 
     let formulario;
     if (data.formulario.pk_formulario_id) {
-      formulario = await this.updateFormulario(formData, data);
+      formulario = await this.updateFormulario(formData, data, userInfo);
     } else {
-      formulario = await this.addForm(formData, data);
+      formulario = await this.addForm(formData, data, userInfo);
     }
 
     const caracteristicasData = data.features.map((caracteristica) => ({

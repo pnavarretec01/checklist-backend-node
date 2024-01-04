@@ -11,10 +11,11 @@ const KEYCLOAK_REALM_PUBLIC_KEY = process.env.KEYCLOAK_REALM_PUBLIC_KEY;
 const KEYCLOAK_REALM = process.env.KEYCLOAK_REALM;
 const KEYCLOAK_CLIENT_ID = process.env.KEYCLOAK_CLIENT_ID;
 const KEYCLOAK_CLIENT_SECRET = process.env.KEYCLOAK_CLIENT_SECRET;
+const KEYCLOAK_URL = process.env.KEYCLOAK_URL;
 
 const keycloakConfig = {
   "clientId": KEYCLOAK_CLIENT_ID,
-  "serverUrl": "http://172.30.100.201:28080/auth",
+  "serverUrl": KEYCLOAK_URL,
   "realm": KEYCLOAK_REALM,
   "credentials": {
     secret: KEYCLOAK_CLIENT_SECRET,
