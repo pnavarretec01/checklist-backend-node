@@ -1,23 +1,23 @@
-const express = require('express'); 
-const { keycloak } = require('../config/keycloak-config')
+const express = require("express");
+const verifyTokenMiddleware = require("../middlewares/verifyToken");
 
-const itemsRouter = require('./items.router');
-const subitemsRouter = require('./subitems.router');
-const formulariosRouter = require('./formularios.router');
-const subdivisionRouter = require('./subdivision.router');
+const itemsRouter = require("./items.router");
+const subitemsRouter = require("./subitems.router");
+const formulariosRouter = require("./formularios.router");
+const subdivisionRouter = require("./subdivision.router");
+const menuRouter = require("./menu.router");
 
 function routerApi(app) {
   const router = express.Router();
-  router.use(keycloak.protect());
-  // router.use(keycloak.protect(), (req, res, next) => {
-  //   console.log(req.kauth.grant.access_token.content);
-  //   next();
-  // });
-  app.use('/api/v1', router); 
-  router.use('/items', itemsRouter);
-  router.use('/subitems', subitemsRouter);
-  router.use('/formularios', formulariosRouter);
-  router.use('/subdivision', subdivisionRouter);
+
+  router
+  .use("/items", verifyTokenMiddleware, itemsRouter)
+  .use("/subitems", verifyTokenMiddleware, subitemsRouter)
+  .use("/formularios", verifyTokenMiddleware, formulariosRouter)
+  .use("/subdivision", verifyTokenMiddleware, subdivisionRouter)
+  .use("/menu", verifyTokenMiddleware, menuRouter)
+
+  app.use("/api/v1", router);
 }
 
 module.exports = routerApi;

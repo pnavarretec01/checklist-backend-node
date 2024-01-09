@@ -3,7 +3,12 @@ const service = new FormularioService();
 
 const get = async (req, res) => {
   try {
-    const response = await service.getAllFormularios();
+    const userInfo = {
+      usuario: req.user.email,
+      email: req.user.email,
+      name: req.user.name,
+    };
+    const response = await service.getAllFormularios(userInfo);
     res.json(response);
   } catch (error) {
     res.status(500).send({ success: false, message: error.message });
@@ -13,8 +18,8 @@ const get = async (req, res) => {
 const addForms = async (req, res) => {
   try {
     const userInfo = {
-      email: req.kauth.grant.access_token.content.email,
-      name: req.kauth.grant.access_token.content.name,
+      email: req.user.email,
+      name: req.user.name,
     };
 
     const result = await service.addFormsAndFeatures(req.body, userInfo);
@@ -45,8 +50,8 @@ const addFeature = async (req, res) => {
 const editFormulario = async (req, res) => {
   try {
     const userInfo = {
-      email: req.kauth.grant.access_token.content.email,
-      name: req.kauth.grant.access_token.content.name,
+      email: req.user.email,
+      name: req.user.name,
     };
 
     await service.handleEditFormulario(req.body, userInfo);
@@ -82,8 +87,8 @@ const deleteFormulario = async (req, res) => {
 const addOrUpdateFormulario = async (req, res) => {
   try {
     const userInfo = {
-      email: req.kauth.grant.access_token.content.email,
-      name: req.kauth.grant.access_token.content.name,
+      email: req.user.email,
+      name: req.user.name,
     };
 
     const result = await service.addOrUpdateForm(req.body, userInfo);

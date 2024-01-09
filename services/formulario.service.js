@@ -1,25 +1,90 @@
+const axios = require("axios");
 const { models } = require("../libs/sequelize");
 const { sendEmail } = require("./mailer");
 const { Op } = require("sequelize");
 
 class FormularioService {
   constructor() {}
-
   deepCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
   }
 
-  async getAllFormularios() {
-    const allFormularios = await this.find();
+  async getAllFormularios(userInfo) {
+    const ID_BD_SISTEMA = process.env.ID_BD_SISTEMA;
+    const URL_BE_SISTEMA_MENU = process.env.URL_BE_SISTEMA_MENU;
 
-    const transformedFormularios = await Promise.all(
-      allFormularios.map(async (formulario) => {
-        const result = await this.getFormularioStructure(formulario);
-        return result.data;
-      })
+    const resp_tk = await axios.get(`${URL_BE_SISTEMA_MENU}/auth/token`, {
+      params: userInfo,
+    });
+
+    const resp_users_sis = await axios.get(
+      `${URL_BE_SISTEMA_MENU}/admsis/${ID_BD_SISTEMA}/usuarios`,
+      {
+        headers: { Authorization: "Bearer " + resp_tk.data.access_token },
+      }
     );
 
-    return transformedFormularios;
+    // Busca el usuario y sus roles
+    const usuarioEncontrado = resp_users_sis.data.find(
+      (u) =>
+        u.pk_usuario.toUpperCase() === userInfo.usuario.toUpperCase() ||
+        (u.alias && u.alias.toUpperCase() === userInfo.usuario.toUpperCase())
+    );
+
+    // verifica si el usuario tiene el rol ADMIN_TRAFICO
+    const esAdminTrafico = usuarioEncontrado?.roles?.some(
+      (rol) => rol.pfk_rol === "ADMIN_TRAFICO"
+    );
+
+    let searchCondition;
+    if (esAdminTrafico) {
+      // el usuario es ADMIN_TRAFICO, obtiene todos los formularios
+      searchCondition = {};
+    } else {
+      // el usuario no es ADMIN_TRAFICO, se asume que es inspector y filtra por su correo
+      searchCondition = { email_usuario: userInfo.email };
+    }
+
+    const allFormularios = await models.Formulario.findAll({
+      where: searchCondition,
+      include: [
+        {
+          model: models.CaracteristicaFormulario,
+          as: "CaracteristicaFormularios",
+          include: [
+            {
+              model: models.Item,
+              as: "Item",
+            },
+            {
+              model: models.SubItem,
+              as: "SubItem",
+            },
+          ],
+        },
+        {
+          model: models.Subdivision,
+          as: "Subdivision",
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const transformedFormularios = allFormularios.map(async (formulario) => {
+      const result = await this.getFormularioStructure(formulario);
+      return result.data;
+    });
+
+    return Promise.all(transformedFormularios);
+  }
+
+  // Implementa el método 'find' para aceptar una condición de búsqueda
+  async find(searchCondition = {}) {
+    return await models.Formulario.findAll({
+      where: searchCondition,
+      include: [],
+      order: [["createdAt", "DESC"]],
+    });
   }
 
   async getFormularioStructure(formulario) {
@@ -131,8 +196,10 @@ class FormularioService {
   }
 
   async addFormsAndFeatures(data, userInfo) {
+    const emailUsuario = userInfo.email;
     const formData = {
       ...data.formulario,
+      email_usuario: emailUsuario,
       fk_subdivision_id:
         data.formulario.subdivision ||
         data.formulario.subdivision.fk_subdivision_id,
@@ -181,13 +248,20 @@ class FormularioService {
 
   async addForm(formularioData, dataCompleta, userInfo) {
     try {
+      formularioData.email_usuario = userInfo.email;
       const formulario = await models.Formulario.create(formularioData);
       const id = formulario.dataValues.pk_formulario_id;
       if (formularioData.cerrado === 1) {
         const subdivision = await this.findSubdivisionById(
           formularioData.fk_subdivision_id
         );
-        sendEmail(formularioData, subdivision.nombre, id, dataCompleta, userInfo);
+        sendEmail(
+          formularioData,
+          subdivision.nombre,
+          id,
+          dataCompleta,
+          userInfo
+        );
       }
 
       return formulario;
@@ -260,7 +334,8 @@ class FormularioService {
 
     await this.updateFormulario({
       pk_formulario_id: pk_formulario_id,
-      ...formData, userInfo
+      ...formData,
+      userInfo,
     });
 
     let caracteristicas = [];

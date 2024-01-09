@@ -50,6 +50,11 @@ const FormularioSchema = {
     type: DataTypes.STRING,
     field: "observacion_general",
   },
+  email_usuario: {
+    allowNull: true,
+    type: DataTypes.STRING,
+    field: "email_usuario",
+  },
   pk_inicio: {
     allowNull: true,
     type: DataTypes.INTEGER,
