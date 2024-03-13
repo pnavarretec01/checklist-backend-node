@@ -474,11 +474,29 @@ class FormularioService {
       });
     }
 
-    // Crear nuevas características
-    const newCaracteristicas = caracteristicasData.map((caracteristica) => ({
-      ...caracteristica,
-      fk_formulario_id: formularioId,
-    }));
+    // Filtrar las características para excluir aquellas sin el parámetro 'collera' o con 'collera' vacío
+    const filteredCaracteristicas = caracteristicasData.filter(
+      (caracteristica) =>
+        caracteristica.collera !== undefined &&
+        caracteristica.collera !== null &&
+        caracteristica.collera !== ""
+    );
+
+    // Si después de filtrar no hay características, termina la ejecución de la función
+    if (filteredCaracteristicas.length === 0) {
+      // console.log(
+      //   "No hay características válidas para guardar, terminando ejecución."
+      // );
+      return;
+    }
+
+    // Crear nuevas características con los datos filtrados
+    const newCaracteristicas = filteredCaracteristicas.map(
+      (caracteristica) => ({
+        ...caracteristica,
+        fk_formulario_id: formularioId,
+      })
+    );
 
     return await models.CaracteristicaFormulario.bulkCreate(newCaracteristicas);
   }
